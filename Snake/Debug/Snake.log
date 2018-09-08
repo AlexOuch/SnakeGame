@@ -1,3 +1,6 @@
-﻿  main.cpp
+﻿  Shader.cpp
+c:\users\alex\source\repos\snake\snake\shader.cpp(36): warning C4101: 'success': unreferenced local variable
+  main.cpp
 c:\users\alex\source\repos\snake\snake\main.cpp(41): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Generating Code...
   Snake.vcxproj -> C:\Users\Alex\source\repos\Snake\Debug\Snake.exe
