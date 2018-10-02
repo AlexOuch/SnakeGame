@@ -1,3 +1,36 @@
 ﻿  main.cpp
-c:\users\alex\source\repos\snake\snake\main.cpp(41): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  Snake.vcxproj -> C:\Users\Alex\source\repos\Snake\Debug\Snake.exe
+c:\users\alex\source\repos\snake\snake\shader.h(52): warning C4101: 'infoLog': unreferenced local variable
+c:\users\alex\source\repos\snake\snake\shader.h(51): warning C4101: 'success': unreferenced local variable
+c:\users\alex\source\repos\snake\snake\main.cpp(43): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Shader.cpp
+c:\users\alex\source\repos\snake\snake\shader.h(96): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(96): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(96): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(105): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(105): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(105): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(114): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(114): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(114): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(123): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(123): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(123): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(128): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(128): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(128): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(133): error C2653: 'glm': is not a class or namespace name
+c:\users\alex\source\repos\snake\snake\shader.h(133): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\alex\source\repos\snake\snake\shader.h(133): error C2143: syntax error: missing ',' before '&'
+c:\users\alex\source\repos\snake\snake\shader.h(98): error C2065: 'value': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(98): error C2198: 'PFNGLUNIFORM2FVPROC': too few arguments for call
+c:\users\alex\source\repos\snake\snake\shader.h(107): error C2065: 'value': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(107): error C2198: 'PFNGLUNIFORM3FVPROC': too few arguments for call
+c:\users\alex\source\repos\snake\snake\shader.h(116): error C2065: 'value': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(116): error C2198: 'PFNGLUNIFORM4FVPROC': too few arguments for call
+c:\users\alex\source\repos\snake\snake\shader.h(125): error C2065: 'mat': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(125): error C2198: 'PFNGLUNIFORMMATRIX2FVPROC': too few arguments for call
+c:\users\alex\source\repos\snake\snake\shader.h(130): error C2065: 'mat': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(130): error C2198: 'PFNGLUNIFORMMATRIX3FVPROC': too few arguments for call
+c:\users\alex\source\repos\snake\snake\shader.h(135): error C2065: 'mat': undeclared identifier
+c:\users\alex\source\repos\snake\snake\shader.h(135): error C2198: 'PFNGLUNIFORMMATRIX4FVPROC': too few arguments for call
+  Generating Code...

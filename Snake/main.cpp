@@ -10,10 +10,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include "Shader.h"
 #include "Setup.h"
+
+#include "Mesh.h"
+#include "Model.h"
+#include "Camera.h"
 
 using namespace std;
 
