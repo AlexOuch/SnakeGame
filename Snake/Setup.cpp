@@ -6,8 +6,9 @@ void windowResizeCallBack(GLFWwindow* window, int width, int height) {
 }
 
 
-bool wireFrame;
 //user inputs
+/*
+bool wireFrame;
 void processInputs(GLFWwindow* window) {
 
 	//if esc pressed, set window to 'should close'
@@ -24,6 +25,7 @@ void processInputs(GLFWwindow* window) {
 	//if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 	//	selectedColour = 1;
 }
+*/
 
 void showFPS(GLFWwindow* window) {
 	//static function variables are declared 
@@ -51,3 +53,4 @@ void showFPS(GLFWwindow* window) {
 	}
 	frameCount++;
 }
+

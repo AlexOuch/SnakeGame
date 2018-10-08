@@ -13,11 +13,25 @@
 #include "Shader.h"
 #include "Setup.h"
 
-#include "Mesh.h"
 #include "Model.h"
 #include "Camera.h"
 
 using namespace std;
+
+bool menu = true;
+
+//window resize call back
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+//mouse move callback
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
+//wheel scroll callback
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+void processInputs(GLFWwindow* window);
+
+unsigned int loadTexture(char const * path);
 
 //Vertex Shader Program Source Code
 const char* vertexShaderSource =
@@ -38,6 +52,22 @@ const char* fragmentShaderSource =
 "{\n"
 "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\n\0";
+
+//Camera Details
+Camera camera(glm::vec3(0.0f, 0.0f, 30.0f));
+bool firstMouse = true;
+float fov = 45.0f;
+
+//My lamps position
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColour(1.0f, 1.0f, 1.0f);
+
+//mouse details
+float lastX = 400, lastY = 300;
+
+//time management
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
 
 void main()
 {
@@ -69,8 +99,20 @@ void main()
 	//set up openGL viewport x,y,w,h
 	glViewport(0, 0, 1280, 720);
 
+	//hide cursor but also capture it inside this window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	//setup mouse move callback
+	glfwSetCursorPosCallback(window, mouse_callback);
+
+	//scroll wheel callback
+	glfwSetScrollCallback(window, scroll_callback);
+
+
 	//set z depth buffering on
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	//load images in, flip them
 	stbi_set_flip_vertically_on_load(true);
@@ -78,6 +120,11 @@ void main()
 	glfwSetFramebufferSizeCallback(window, windowResizeCallBack);
 
 	Shader shaderProgram1("vertexShader1.txt", "fragmentShader1.txt");
+	Shader lightShader("modelShader.vs", "modelShader.fs");
+	Shader lampShader("shader6.vs", "lampShader.fs");
+
+	Model yoshiEgg("assets/YoshiEgg.obj");
+
 
 	//Compile Shader Source into shader programs
 	//vertex shader first
@@ -95,6 +142,7 @@ void main()
 	//check for errors
 	int success;
 	char infoLog[512];
+
 	//check compile status for our program, store result in success
 	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &success);
 	//failed?
@@ -204,29 +252,61 @@ void main()
 	
 	stbi_image_free(image1Data);
 
-	
+	glfwSetCursorPos(window, lastX, lastY);
 	//GAME LOOP
 	while (!glfwWindowShouldClose(window)) {
+
+		//time management
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
 		//user input
 		processInputs(window);
 
 		glClearColor(0, 0, 1, 1); //blue
-		glClear(GL_COLOR_BUFFER_BIT); //clear screen with clear colour
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear screen with clear colour
+		
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::mat4(1.0f);
+		projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
-		shaderProgram1.use();
-		int texture1Uniform = glGetUniformLocation(shaderProgram1.ID, "texture1");
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1ID);
-		glUniform1i(texture1Uniform, 0);
-		glBindVertexArray(textureRectVAO);
+		if (menu) {
+			shaderProgram1.use();
+			int texture1Uniform = glGetUniformLocation(shaderProgram1.ID, "texture1");
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture1ID);
+			glUniform1i(texture1Uniform, 0);
+			glBindVertexArray(textureRectVAO);
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+
+		if (!menu) {
+			lightShader.use();
+			lightShader.setVec3("objectColor", 1.0f, 0.5f, 1.0f);
+			lightShader.setVec3("lightColor", lightColour);
+			lightShader.setVec3("lightPos", lightPos);
+			lightShader.setVec3("viewPos", camera.Position);
+
+			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+			lightShader.setMat4("model", model);
+			yoshiEgg.Draw(lightShader);
+
+			lampShader.use();
+			lampShader.setVec3("lightColor", lightColour);
+		}
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 		showFPS(window);
 
+		
 	}
 
 	//optional: de-allocate all resources
@@ -238,4 +318,120 @@ void main()
 	//yoshi
 }
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.ProcessMouseScroll(yoffset);
+}
+
+unsigned int loadTexture(char const * path)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
+}
+
+void processInputs(GLFWwindow* window) {
+
+	
+
+	if (menu) {
+		//if esc pressed, set window to 'should close'
+		//if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			//glfwSetWindowShouldClose(window, true);
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			menu = false;
+	}
+
+	if (!menu) {
+		//if esc pressed, set window to 'should close'
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			menu = true;
+
+		float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			camera.ProcessKeyboard(FORWARD, deltaTime * 5);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			camera.ProcessKeyboard(BACKWARD, deltaTime * 5);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			camera.ProcessKeyboard(LEFT, deltaTime * 5);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			camera.ProcessKeyboard(RIGHT, deltaTime * 5);
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		{
+			lightColour.r += deltaTime;
+			lightColour.g += deltaTime;
+			lightColour.b += deltaTime;
+			if (lightColour.r > 1)
+				lightColour.r = 1;
+			if (lightColour.g > 1)
+				lightColour.g = 1;
+			if (lightColour.b > 1)
+				lightColour.b = 1;
+		}
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		{
+			lightColour.r -= deltaTime;
+			lightColour.g -= deltaTime;
+			lightColour.b -= deltaTime;
+			if (lightColour.r < 0)
+				lightColour.r = 0;
+			if (lightColour.g < 0)
+				lightColour.g = 0;
+			if (lightColour.b < 0)
+				lightColour.b = 0;
+		}
+	}
+
+
+}
