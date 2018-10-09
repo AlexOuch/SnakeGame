@@ -1,13 +1,13 @@
 ﻿  main.cpp
 c:\users\alex\source\repos\snake\snake\shader.h(52): warning C4101: 'infoLog': unreferenced local variable
 c:\users\alex\source\repos\snake\snake\shader.h(51): warning C4101: 'success': unreferenced local variable
-c:\users\alex\source\repos\snake\snake\main.cpp(73): warning C4326: return type of 'main' should be 'int' instead of 'void'
-c:\users\alex\source\repos\snake\snake\main.cpp(260): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(329): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(330): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(334): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(335): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(336): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(337): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\alex\source\repos\snake\snake\main.cpp(344): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(84): warning C4326: return type of 'main' should be 'int' instead of 'void'
+c:\users\alex\source\repos\snake\snake\main.cpp(275): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(362): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(363): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(367): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(368): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(369): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(370): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\alex\source\repos\snake\snake\main.cpp(377): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   Snake.vcxproj -> C:\Users\Alex\source\repos\Snake\Debug\Snake.exe

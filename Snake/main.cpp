@@ -55,6 +55,7 @@ const char* fragmentShaderSource =
 
 //Camera Details
 Camera camera(glm::vec3(0.0f, 0.0f, 30.0f));
+
 bool firstMouse = true;
 float fov = 45.0f;
 
@@ -68,6 +69,16 @@ float lastX = 400, lastY = 300;
 //time management
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+
+//movement of models
+float posX;
+float posZ;
+bool movingUp;
+bool movingDown;
+bool movingLeft;
+bool movingRight;
+float yoshiRotation = glm::radians(-90.0f);
+void resetMovement();
 
 void main()
 {
@@ -123,8 +134,8 @@ void main()
 	Shader lightShader("modelShader.vs", "modelShader.fs");
 	Shader lampShader("shader6.vs", "lampShader.fs");
 
-	Model yoshiEgg("assets/YoshiEgg.obj");
-
+	Model yoshiEgg("assets/Egg/YoshiEgg.obj");
+	Model yoshi("assets/Yoshi/Yoshi.obj");
 
 	//Compile Shader Source into shader programs
 	//vertex shader first
@@ -254,6 +265,10 @@ void main()
 
 	glfwSetCursorPos(window, lastX, lastY);
 	//GAME LOOP
+	//camera position and angle
+	camera.setPosition(0, 50.0f, 30.0f);
+	camera.setAngle(-90.0f, -50.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 
 		//time management
@@ -292,14 +307,31 @@ void main()
 			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-			model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-			lightShader.setMat4("model", model);
+			
+			glm::mat4 eggModel = glm::mat4(1.0f);
+			eggModel = glm::translate(eggModel, glm::vec3(4.0f, 0.0f, 0.0f));
+			eggModel = glm::scale(eggModel, glm::vec3(0.03f, 0.03f, 0.03f));
+			lightShader.setMat4("model", eggModel);
 			yoshiEgg.Draw(lightShader);
+			
+			glm::mat4 yoshiModel = glm::mat4(1.0f);
+			yoshiModel = glm::translate(yoshiModel, glm::vec3(posX, 0.0f, posZ));
+			yoshiModel = glm::rotate(yoshiModel, yoshiRotation, glm::vec3(0, 1, 0));
+			yoshiModel = glm::scale(yoshiModel, glm::vec3(10.0f, 10.0f, 10.0f));
+			lightShader.setMat4("model", yoshiModel);
+			yoshi.Draw(lightShader);
 
-			lampShader.use();
-			lampShader.setVec3("lightColor", lightColour);
+			if (movingUp)
+				posZ -= deltaTime * 30;
+			if (movingDown)
+				posZ += deltaTime * 30;
+			if (movingLeft)
+				posX -= deltaTime * 30;
+			if (movingRight)
+				posX += deltaTime * 30;
+
+			//lampShader.use();
+			//lampShader.setVec3("lightColor", lightColour);
 		}
 
 		glfwPollEvents();
@@ -322,6 +354,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	if (firstMouse)
@@ -383,21 +416,20 @@ unsigned int loadTexture(char const * path)
 
 void processInputs(GLFWwindow* window) {
 
-	
+
 
 	if (menu) {
 		//if esc pressed, set window to 'should close'
-		//if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			//glfwSetWindowShouldClose(window, true);
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 			menu = false;
 	}
 
 	if (!menu) {
-		//if esc pressed, set window to 'should close'
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
 			menu = true;
-
+		
 		float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			camera.ProcessKeyboard(FORWARD, deltaTime * 5);
@@ -407,31 +439,37 @@ void processInputs(GLFWwindow* window) {
 			camera.ProcessKeyboard(LEFT, deltaTime * 5);
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 			camera.ProcessKeyboard(RIGHT, deltaTime * 5);
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		{
-			lightColour.r += deltaTime;
-			lightColour.g += deltaTime;
-			lightColour.b += deltaTime;
-			if (lightColour.r > 1)
-				lightColour.r = 1;
-			if (lightColour.g > 1)
-				lightColour.g = 1;
-			if (lightColour.b > 1)
-				lightColour.b = 1;
+		
+
+
+		//yoshi movement
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			yoshiRotation = glm::radians(180.0f);
+			resetMovement();
+			movingUp = true;
+
 		}
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		{
-			lightColour.r -= deltaTime;
-			lightColour.g -= deltaTime;
-			lightColour.b -= deltaTime;
-			if (lightColour.r < 0)
-				lightColour.r = 0;
-			if (lightColour.g < 0)
-				lightColour.g = 0;
-			if (lightColour.b < 0)
-				lightColour.b = 0;
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			yoshiRotation = glm::radians(0.0f);
+			resetMovement();
+			movingDown = true;
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+			yoshiRotation = glm::radians(-90.0f);
+			resetMovement();
+			movingLeft = true;
+		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+			yoshiRotation = glm::radians(90.0f);
+			resetMovement();
+			movingRight = true;
 		}
 	}
+}
 
-
+void resetMovement() {
+	movingUp = false;
+	movingDown = false;
+	movingLeft = false;
+	movingRight = false;
 }

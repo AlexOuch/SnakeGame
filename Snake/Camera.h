@@ -7,6 +7,7 @@
 
 #include <vector>
 
+using namespace std;
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
 	FORWARD,
@@ -50,6 +51,7 @@ public:
 		Pitch = pitch;
 		updateCameraVectors();
 	}
+
 	// Constructor with scalar values
 	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 	{
@@ -64,6 +66,16 @@ public:
 	glm::mat4 GetViewMatrix()
 	{
 		return glm::lookAt(Position, Position + Front, Up);
+	}
+
+	void setPosition(float x, float y, float z) {
+		Position = glm::vec3(x, y, z);
+	}
+
+	void setAngle(float x, float y) {
+		Yaw = x;
+		Pitch = y;
+		updateCameraVectors();
 	}
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
