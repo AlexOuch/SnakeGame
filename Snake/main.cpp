@@ -133,6 +133,7 @@ void main()
 	Shader shaderProgram1("vertexShader1.txt", "fragmentShader1.txt");
 	Shader lightShader("modelShader.vs", "modelShader.fs");
 	Shader lampShader("shader6.vs", "lampShader.fs");
+	Shader groundShader("cubeVertexShader.txt", "cubeFragmentShader.txt");
 
 	Model yoshiEgg("assets/Egg/YoshiEgg.obj");
 	Model yoshi("assets/Yoshi/Yoshi.obj");
@@ -207,6 +208,52 @@ void main()
 		1, 2, 3 //seconds triangle
 	};
 
+	float textureCubeVertices[] = {
+		//x		y		z	tenX	tenY
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, -1.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, -1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+
+		0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, -1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, -1.0f,
+		0.5f, -0.5f, 0.5f, 0.0f, -1.0f,
+		0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f
+	};
+
+	//menu vbo/vao and binding
 	unsigned int textureRectVBO;
 	glGenBuffers(1, &textureRectVBO);
 	
@@ -252,6 +299,8 @@ void main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//for stretching
 
 	//load up jpg file
+
+	//menu
 	int width, height, numberChannels;
 	unsigned char* image1Data = stbi_load("menu.jpg", &width, &height, &numberChannels, 0);
 
@@ -262,6 +311,94 @@ void main()
 	else cout << "image failed to load" << endl;
 	
 	stbi_image_free(image1Data);
+
+
+
+
+
+	//generate a texture in gpu, return id
+	unsigned int cubeTexture1ID;
+	glGenTextures(1, &cubeTexture1ID);
+	//we bind the texture to make it the one we're working on
+	glBindTexture(GL_TEXTURE_2D, cubeTexture1ID);
+	//set wrapping options(repeat texture if texture coordinates dont fully cover polygons)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//wrap on the s(x) axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//wraps on the t(y) axis
+																 //set filtering options
+																 //Suggestion use nearest neighbour for pixel art, use bilinear for pretty much everything else
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//GL_LINEAR(bilinear) or GL_NEAREST for shrinking
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//for stretching
+
+																	 //LOAD UP IMAGE FILE (JPEG FIRST)
+	int cubeWidth, cubeHeight, cubeNumberChannels; //as we load an image, we'll get values from it to fill these in
+	unsigned char *ground1Data = stbi_load("assets/yoshiGround/yoshiGround.jpg", &cubeWidth, &cubeHeight, &cubeNumberChannels, 0);
+	//if it loaded
+	if (ground1Data) {
+		cout << "Success! Image is " << cubeWidth << " by " << cubeHeight << "pixels" << endl;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cubeWidth, cubeHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, ground1Data);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		cout << "Image load failed!" << endl;
+	}
+	//cleanup image memory
+	stbi_image_free(ground1Data);
+
+	//Generate a texture in our graphics card to work with
+	unsigned int cubeTexture2ID;
+	glGenTextures(1, &cubeTexture2ID); //generate 1 texture id and store in texture2ID
+	glBindTexture(GL_TEXTURE_2D, cubeTexture2ID);//make this texture the currently working texture, sayings its a 2d texture (as opposed to 1d and 3d)
+											 //how will texture repeat on large surfaces
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);//how wrap horizontally (S axis...)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//how to wrap vertically (T axis..)
+																 //how will texture deal with shrink and stretch
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //when shrinking texture use bilinear filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//use nearest neighbour filtering on stretch
+
+																	  //Load up an image
+	unsigned char *groundData2 = stbi_load("assets/yoshiGround/yoshiGround.png", &cubeWidth, &cubeHeight, &cubeNumberChannels, 0);
+	if (groundData2) {
+		//give the texture in our graphics card the data from this png file
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cubeWidth, cubeHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, groundData2);
+		//generate mipmaps for this texture
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		cout << "failed to load score" << endl;
+	}
+	//free image data from ram because theres a copy in the texture
+	stbi_image_free(groundData2);
+
+	unsigned int cubeVBO;
+	glGenBuffers(1, &cubeVBO);
+
+	//3. Vertex Array Object? tries to describe the data in the VBO and relay it to the first shader
+	unsigned int cubeVAO;
+	glGenVertexArrays(1, &cubeVAO);
+
+	glBindVertexArray(cubeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(textureCubeVertices), textureCubeVertices, GL_STATIC_DRAW);
+
+	//xyz to location = 0
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	//texture coordinates to location = 1
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	//unbind stuff
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+
+
 
 	glfwSetCursorPos(window, lastX, lastY);
 	//GAME LOOP
@@ -287,6 +424,19 @@ void main()
 		projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		if (menu) {
+
+
+			//resetting yoshi and camera
+			camera.setPosition(0, 50.0f, 30.0f);
+			camera.setAngle(-90.0f, -50.0f);
+
+			posX = 0;
+			posZ = 0;
+			resetMovement();
+			yoshiRotation = glm::radians(-90.0f);
+			//
+			
+			//menu screen			
 			shaderProgram1.use();
 			int texture1Uniform = glGetUniformLocation(shaderProgram1.ID, "texture1");
 			glActiveTexture(GL_TEXTURE0);
@@ -298,6 +448,30 @@ void main()
 		}
 
 		if (!menu) {
+
+			groundShader.use();
+
+			glBindVertexArray(cubeVAO);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, cubeTexture1ID);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, cubeTexture2ID);
+
+			glUniform1i(glGetUniformLocation(groundShader.ID, "texture1"), 0);
+			glUniform1i(glGetUniformLocation(groundShader.ID, "texture2"), 1);
+
+			glUniformMatrix4fv(glGetUniformLocation(groundShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(groundShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+			glm::mat4 ground = glm::mat4(1.0f);
+			ground = glm::translate(ground, glm::vec3(0.0f, -40.0f, -25.0f));
+			ground = glm::scale(ground, glm::vec3(80.0f, 80.0f, 80.0f));
+
+			glUniformMatrix4fv(glGetUniformLocation(groundShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(ground));
+			glDrawArrays(GL_TRIANGLES, 0, 36); //strarting at stride0, draw 36 rows of vertex data
+
+			//model stuff
 			lightShader.use();
 			lightShader.setVec3("objectColor", 1.0f, 0.5f, 1.0f);
 			lightShader.setVec3("lightColor", lightColour);
@@ -307,13 +481,14 @@ void main()
 			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 			glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-			
+			//eggmodel
 			glm::mat4 eggModel = glm::mat4(1.0f);
 			eggModel = glm::translate(eggModel, glm::vec3(4.0f, 0.0f, 0.0f));
 			eggModel = glm::scale(eggModel, glm::vec3(0.03f, 0.03f, 0.03f));
 			lightShader.setMat4("model", eggModel);
 			yoshiEgg.Draw(lightShader);
 			
+			//yoshi model
 			glm::mat4 yoshiModel = glm::mat4(1.0f);
 			yoshiModel = glm::translate(yoshiModel, glm::vec3(posX, 0.0f, posZ));
 			yoshiModel = glm::rotate(yoshiModel, yoshiRotation, glm::vec3(0, 1, 0));
@@ -321,17 +496,31 @@ void main()
 			lightShader.setMat4("model", yoshiModel);
 			yoshi.Draw(lightShader);
 
-			if (movingUp)
+			//movement
+			if (movingUp) {
 				posZ -= deltaTime * 30;
-			if (movingDown)
+				if (posZ < -65)
+					posZ = -65;
+			}
+			if (movingDown) {
 				posZ += deltaTime * 30;
-			if (movingLeft)
+				if (posZ > 15)
+					posZ = 15;
+			}
+			if (movingLeft) {
 				posX -= deltaTime * 30;
-			if (movingRight)
+				if (posX < -40)
+					posX = -40;
+			}
+			if (movingRight) {
 				posX += deltaTime * 30;
-
+				if (posX > 40)
+					posX = 40;
+			}
 			//lampShader.use();
 			//lampShader.setVec3("lightColor", lightColour);
+			
+
 		}
 
 		glfwPollEvents();
